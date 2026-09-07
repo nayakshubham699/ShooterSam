@@ -1,0 +1,27 @@
+# Ignore everything in Content by default
+Content/*
+
+# But allow these folders back in
+!Content/MyStuff/
+!Content/Input/
+
+# Unreal generated folders
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+
+# Unreal generated solution/project files
+*.sln
+*.suo
+*.opensdf
+*.sdf
+
+# OS files
+.DS_Store
+Thumbs.db
