@@ -7,6 +7,9 @@
 #include "Logging/LogMacros.h"
 
 #include "Gun.h"
+#include "ShooterSamPlayerController.h"
+//#include "ShooterSamGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "ShooterSamCharacter.generated.h"
 
@@ -14,6 +17,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
+
+class AShooterSamGameMode;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -115,6 +120,10 @@ public:
 
 	float Health;
 
+	AShooterSamGameMode* GameMode;
+
+	AShooterSamPlayerController* PlayerController;
+
 	
 	UPROPERTY(BlueprintReadOnly)
 	bool IsAlive = true;
@@ -123,7 +132,11 @@ public:
 
 	void UpdateHUD();
 
+	void SetPlayerEnabled(bool Enabled);
+
 	UFUNCTION()
 	void OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+
 };
 

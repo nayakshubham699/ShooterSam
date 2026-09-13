@@ -3,7 +3,6 @@
 #include "ShooterSamGameMode.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "ShooterSamCharacter.h"
 #include "ShooterAI.h"
 
 AShooterSamGameMode::AShooterSamGameMode()
@@ -15,7 +14,7 @@ void AShooterSamGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AShooterSamCharacter* Player = Cast<AShooterSamCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	Player = Cast<AShooterSamCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 
 	TArray<AActor*> ShooterAIActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShooterAI::StaticClass(), ShooterAIActors);
@@ -30,4 +29,113 @@ void AShooterSamGameMode::BeginPlay()
 			ShooterAI->StartBehaviorTree(Player);
 		}
 	}
+	// Alive Enemy count
+	
+	TotalEnemyCount = ShooterAIActors.Num();
+	AliveEnemyCount = TotalEnemyCount;
+	
+	//CountDownCode
+	CountDownSeconds = CountDownDelay;
+
+	GetWorldTimerManager().SetTimer(CountDownTimerHandle, this, &AShooterSamGameMode::OnCountDownTimerTimeout, 1.0f, true);
+
+	PlayerController = Cast<AShooterSamPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	if (PlayerController)
+	{
+		HUDWidget = CreateWidget<UHUDWidget>(PlayerController, HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->SetCountDownText(FString::Printf(TEXT("Get Ready")));
+			HUDWidget->SetEnemyCountText(FString::Printf(TEXT("%d"), AliveEnemyCount));
+			HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Hidden);
+			HUDWidget->AddToViewport();
+		}
+	}
+}
+
+void AShooterSamGameMode::ActorDied(AActor* DeadActor)
+{
+	bool IsGameOver = false;
+	if (DeadActor == Player)
+	{
+		IsGameOver = true;
+		IsVictory = false;
+	}
+	else
+	{
+		AliveEnemyCount--;
+
+		HUDWidget->SetEnemyCountText(FString::Printf(TEXT("%d"), AliveEnemyCount));
+		if(AliveEnemyCount == 0)
+		{
+			IsVictory = true;
+			IsGameOver = true;
+
+			
+		}
+	}
+
+	if (IsGameOver)
+	{
+		PlayerController->bShowMouseCursor = true;
+		
+		GameOver(IsVictory);
+	}
+}
+
+void AShooterSamGameMode::OnCountDownTimerTimeout()
+{
+	CountDownSeconds--;
+	if(CountDownSeconds > 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Countdown: %d"), CountDownSeconds);
+		if(HUDWidget)
+		{
+			HUDWidget->SetCountDownText(FString::Printf(TEXT("%d"), CountDownSeconds));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HUDWidget is null!"));
+		}
+	}
+	else if(CountDownSeconds == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Countdown finished!"));
+		if (HUDWidget)
+		{
+			HUDWidget->SetCountDownText(FString::Printf(TEXT("Go!")));
+		}
+		Player->SetPlayerEnabled(true);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(CountDownTimerHandle);
+		if (HUDWidget)
+		{
+			HUDWidget->CountDown->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void AShooterSamGameMode::GameOver(bool Victory)
+{
+	if (Victory)
+	{
+		HUDWidget->CountDown->SetColorAndOpacity(FSlateColor(FLinearColor::Green));
+		
+		HUDWidget->SetCountDownText(FString::Printf(TEXT("Mission Successful!")));
+
+		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		HUDWidget->CountDown->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+		
+		HUDWidget->SetCountDownText(FString::Printf(TEXT("You Died!")));
+
+		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Visible);
+	}
+
+	HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Visible);
 }

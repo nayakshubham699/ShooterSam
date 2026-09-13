@@ -32,11 +32,15 @@ void AShooterSamPlayerController::BeginPlay()
 
 	}
 
+	/*
 	HUDWidget = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
 	if (HUDWidget)
 	{
 		HUDWidget->AddToViewport();
+
+		//HUDWidget->HealthBar->SetVisibility(ESlateVisibility::Hidden);
 	}
+	*/
 }
 
 void AShooterSamPlayerController::SetupInputComponent()

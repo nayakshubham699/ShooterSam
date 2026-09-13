@@ -12,7 +12,7 @@
 #include "InputActionValue.h"
 #include "ShooterSam.h"
 
-#include "ShooterSamPlayerController.h"
+#include "ShooterSamGameMode.h"
 
 AShooterSamCharacter::AShooterSamCharacter()
 {
@@ -69,6 +69,10 @@ void AShooterSamCharacter::BeginPlay()
 		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 		Gun->OwnerController = GetController();
 	}
+
+	PlayerController = Cast<AShooterSamPlayerController>(GetController());
+
+	SetPlayerEnabled(false);
 }
 
 void AShooterSamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -168,8 +172,8 @@ void AShooterSamCharacter::Shoot()
 
 void AShooterSamCharacter::UpdateHUD()
 {
-	AShooterSamPlayerController* PlayerController = Cast<AShooterSamPlayerController>(GetController());
-	if (PlayerController)
+	GameMode = Cast<AShooterSamGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GameMode)
 	{
 		float NewPercent = Health / MaxHealth;
 		if (NewPercent < 0.0f)
@@ -177,7 +181,21 @@ void AShooterSamCharacter::UpdateHUD()
 			NewPercent = 0.0f;
 		}
 		
-		PlayerController->HUDWidget->SetHealthBarPercent(NewPercent);
+		//PlayerController->HUDWidget->SetHealthBarPercent(NewPercent);
+		
+		GameMode->HUDWidget->SetHealthBarPercent(NewPercent);
+	}
+}
+
+void AShooterSamCharacter::SetPlayerEnabled(bool Enabled)
+{
+	if (Enabled)
+	{
+		EnableInput(PlayerController);
+	}
+	else
+	{
+		DisableInput(PlayerController);
 	}
 }
 
@@ -186,11 +204,18 @@ void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, con
 	if (IsAlive)
 	{
 		Health -= Damage;
-		UpdateHUD();
+		if (DamagedActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		{
+			UpdateHUD();
+		}
 		if (Health <= 0.0f)
 		{
 			IsAlive = false;
 			Health = 0.0f;
+			if (GameMode)
+			{
+				GameMode->ActorDied(DamagedActor);
+			}
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			DetachFromControllerPendingDestroy();
 		}

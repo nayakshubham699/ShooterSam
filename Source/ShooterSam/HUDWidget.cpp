@@ -3,10 +3,42 @@
 
 #include "HUDWidget.h"
 
+#include "Kismet/GameplayStatics.h"
+
+void UHUDWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	if (ReplayButton)
+	{
+		ReplayButton->OnClicked.AddDynamic(this, &UHUDWidget::OnReplayButtonClicked);
+	}
+}
+
 void UHUDWidget::SetHealthBarPercent(float NewPercent)
 {
 	if (NewPercent >= 0.0f && NewPercent <= 1.0f)
 	{
 		HealthBar->SetPercent(NewPercent);
 	}
+}
+
+void UHUDWidget::SetCountDownText(FString CountDownText)
+{
+	if (CountDown)
+	{
+		CountDown->SetText(FText::FromString(CountDownText));
+	}
+}
+
+void UHUDWidget::SetEnemyCountText(FString EnemyCountText)
+{
+	if (EnemyCount)
+	{
+		EnemyCount->SetText(FText::FromString(EnemyCountText));
+	}
+}
+
+void UHUDWidget::OnReplayButtonClicked()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
