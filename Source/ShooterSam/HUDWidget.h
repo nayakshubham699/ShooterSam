@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidgetOptional))
 	UButton* ReplayButton;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidgetOptional))
+	UButton* ExitButton;
+
 	virtual void NativeConstruct() override;
 
 	void SetHealthBarPercent(float NewPercent);
@@ -42,4 +45,7 @@ public:
 
 	UFUNCTION()
 	void OnReplayButtonClicked();
+
+	UFUNCTION()
+	void OnExitButtonClicked();
 };

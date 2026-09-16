@@ -4,6 +4,7 @@
 #include "HUDWidget.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UHUDWidget::NativeConstruct()
 {
@@ -11,6 +12,11 @@ void UHUDWidget::NativeConstruct()
 	if (ReplayButton)
 	{
 		ReplayButton->OnClicked.AddDynamic(this, &UHUDWidget::OnReplayButtonClicked);
+	}
+
+	if (ExitButton)
+	{
+		ExitButton->OnClicked.AddDynamic(this, &UHUDWidget::OnExitButtonClicked);
 	}
 }
 
@@ -41,4 +47,9 @@ void UHUDWidget::SetEnemyCountText(FString EnemyCountText)
 void UHUDWidget::OnReplayButtonClicked()
 {
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+void UHUDWidget::OnExitButtonClicked()
+{
+	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
 }

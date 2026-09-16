@@ -49,6 +49,7 @@ void AShooterSamGameMode::BeginPlay()
 			HUDWidget->SetCountDownText(FString::Printf(TEXT("Get Ready")));
 			HUDWidget->SetEnemyCountText(FString::Printf(TEXT("%d"), AliveEnemyCount));
 			HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Hidden);
+			HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Hidden);
 			HUDWidget->AddToViewport();
 		}
 	}
@@ -138,4 +139,6 @@ void AShooterSamGameMode::GameOver(bool Victory)
 	}
 
 	HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Visible);
+
+	HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Visible);
 }
