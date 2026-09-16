@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidgetOptional))
 	UButton* ExitButton;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidgetOptional))
+	UButton* ResumeButton;
+
 	virtual void NativeConstruct() override;
 
 	void SetHealthBarPercent(float NewPercent);
@@ -48,4 +51,7 @@ public:
 
 	UFUNCTION()
 	void OnExitButtonClicked();
+
+	UFUNCTION()
+	void OnResumeButtonClicked();
 };

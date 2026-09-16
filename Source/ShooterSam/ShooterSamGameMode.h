@@ -7,7 +7,7 @@
 
 #include "ShooterSamCharacter.h"
 #include "HUDWidget.h"
-#include "ShooterSamPlayerController.h"
+//#include "ShooterSamPlayerController.h"
 
 #include "ShooterSamGameMode.generated.h"
 
@@ -51,13 +51,15 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UHUDWidget* HUDWidget;
 
-	AShooterSamPlayerController* PlayerController;
+	//AShooterSamPlayerController* PlayerController;
 
 	void ActorDied(AActor* DeadActor);
 
 	void OnCountDownTimerTimeout();
 
 	void GameOver(bool Victory);
+
+	void HUDDisplayToggle( bool bHUDVisible);
 };
 
 

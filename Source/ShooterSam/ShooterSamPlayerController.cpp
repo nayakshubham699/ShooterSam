@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ShooterSam.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+#include "ShooterSamGameMode.h"
 
 void AShooterSamPlayerController::BeginPlay()
 {
@@ -47,6 +48,8 @@ void AShooterSamPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	
+
 	// only add IMCs for local player controllers
 	if (IsLocalPlayerController())
 	{
@@ -68,10 +71,60 @@ void AShooterSamPlayerController::SetupInputComponent()
 			}
 		}
 	}
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+
+	if (EnhancedInputComponent)
+	{
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &AShooterSamPlayerController::TogglePause);
+	}
 }
 
 bool AShooterSamPlayerController::ShouldUseTouchControls() const
 {
 	// are we on a mobile platform? Should we force touch?
 	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+}
+
+void AShooterSamPlayerController::TogglePause()
+{
+	bool bIsPaused = UGameplayStatics::IsGamePaused(GetWorld());
+	UE_LOG(LogTemp, Display, TEXT("TogglePause: bIsPaused = %s"), bIsPaused ? TEXT("true") : TEXT("false"));
+	if (bIsPaused)
+	{
+		PauseGame(false);
+	}
+	else
+	{
+		PauseGame(true);
+	}
+}
+
+void AShooterSamPlayerController::PauseGame(bool bPause)
+{
+	AShooterSamGameMode* ShooterSamGameMode = Cast<AShooterSamGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (ShooterSamGameMode)
+	{
+		if (bPause)
+		{
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+			ShooterSamGameMode->HUDWidget->SetCountDownText(FString::Printf(TEXT("Paused")));
+			ShooterSamGameMode->HUDWidget->ResumeButton->SetVisibility(ESlateVisibility::Visible);
+
+			ShooterSamGameMode->HUDDisplayToggle(true);
+			SetInputMode(FInputModeUIOnly());
+		}
+		else
+		{
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+			ShooterSamGameMode->HUDWidget->ResumeButton->SetVisibility(ESlateVisibility::Hidden);
+
+			ShooterSamGameMode->HUDDisplayToggle(false);
+			SetInputMode(FInputModeGameOnly());
+		}
+	}
+
+	bShowMouseCursor = bPause;
 }

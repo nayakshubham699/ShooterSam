@@ -4,6 +4,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "ShooterAI.h"
+#include "ShooterSamPlayerController.h"
 
 AShooterSamGameMode::AShooterSamGameMode()
 {
@@ -39,7 +40,7 @@ void AShooterSamGameMode::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(CountDownTimerHandle, this, &AShooterSamGameMode::OnCountDownTimerTimeout, 1.0f, true);
 
-	PlayerController = Cast<AShooterSamPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	AShooterSamPlayerController*PlayerController = Cast<AShooterSamPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	if (PlayerController)
 	{
@@ -50,6 +51,7 @@ void AShooterSamGameMode::BeginPlay()
 			HUDWidget->SetEnemyCountText(FString::Printf(TEXT("%d"), AliveEnemyCount));
 			HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Hidden);
 			HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Hidden);
+			HUDWidget->ResumeButton->SetVisibility(ESlateVisibility::Hidden);
 			HUDWidget->AddToViewport();
 		}
 	}
@@ -79,9 +81,13 @@ void AShooterSamGameMode::ActorDied(AActor* DeadActor)
 
 	if (IsGameOver)
 	{
-		PlayerController->bShowMouseCursor = true;
-		
-		GameOver(IsVictory);
+		AShooterSamPlayerController* PlayerController = Cast<AShooterSamPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		if (PlayerController)
+		{
+			PlayerController->bShowMouseCursor = true;
+
+			GameOver(IsVictory);
+		}
 	}
 }
 
@@ -127,7 +133,7 @@ void AShooterSamGameMode::GameOver(bool Victory)
 		
 		HUDWidget->SetCountDownText(FString::Printf(TEXT("Mission Successful!")));
 
-		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Visible);
+		HUDDisplayToggle(true);
 	}
 	else
 	{
@@ -135,10 +141,29 @@ void AShooterSamGameMode::GameOver(bool Victory)
 		
 		HUDWidget->SetCountDownText(FString::Printf(TEXT("You Died!")));
 
-		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Visible);
+		HUDDisplayToggle(true);
 	}
 
-	HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Visible);
+	
+}
 
-	HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Visible);
+void AShooterSamGameMode::HUDDisplayToggle(bool bHUDVisible)
+{
+	if (bHUDVisible)
+	{
+		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Visible);
+
+		HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Visible);
+
+		HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		HUDWidget->CountDown->SetVisibility(ESlateVisibility::Hidden);
+
+		HUDWidget->ReplayButton->SetVisibility(ESlateVisibility::Hidden);
+
+		HUDWidget->ExitButton->SetVisibility(ESlateVisibility::Hidden);
+	}
+	
 }

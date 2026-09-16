@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 
 #include "HUDWidget.h"
+#include "EnhancedInputComponent.h"
 
 #include "ShooterSamPlayerController.generated.h"
 
@@ -54,9 +55,16 @@ protected:
 
 public:
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* PauseAction;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UHUDWidget> HUDWidgetClass;
 
 	UPROPERTY(VisibleAnywhere)
 	UHUDWidget* HUDWidget;
+
+	void TogglePause();
+
+	void PauseGame(bool bPause);
 };
